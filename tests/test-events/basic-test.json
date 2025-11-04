@@ -1,0 +1,19 @@
+{
+  "url": "https://example.com",
+  "extract": {
+    "heading": true,
+    "headingSelector": "h1",
+    "metadata": true,
+    "selectors": [
+      {
+        "name": "description",
+        "selector": "p",
+        "attribute": "textContent"
+      }
+    ]
+  },
+  "optimizations": {
+    "disableImages": true,
+    "disableJavaScript": false
+  }
+}

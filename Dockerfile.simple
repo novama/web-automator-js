@@ -1,0 +1,23 @@
+# Simple Lambda container for local development/testing
+FROM public.ecr.aws/lambda/nodejs:22
+
+# Set working directory
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source code
+COPY index.js ./
+COPY src/ ./src/
+
+# Set environment variables for Lambda
+ENV NODE_ENV=development
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
+
+# Install Playwright browsers for development
+RUN npx playwright install chromium --with-deps || echo "Browser install failed, will use fallback"
+
+# Lambda configuration
+CMD ["index.lambda_handler"]

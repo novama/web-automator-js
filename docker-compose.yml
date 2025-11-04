@@ -1,0 +1,86 @@
+services:
+  # Lambda function container
+  web-automator-lambda:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: web-automator-lambda
+    ports:
+      - "9000:8080"  # Lambda Runtime Interface Emulator port
+    environment:
+      # Lambda environment variables
+      - NODE_ENV=production
+      - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+      # Optional: Override default config
+      - AUTOMATION_DEFAULT_URL=https://example.com
+      - PLAYWRIGHT_BROWSER=chromium
+      - PLAYWRIGHT_TIMEOUT=25000
+      # Add debugging
+      - DEBUG=pw:*
+    volumes:
+      # Mount config file if you want to override at runtime
+      # - ./docker-run/lambda-config.json:/var/task/config/lambda-config.json
+      # Optional: Mount logs directory for debugging
+      - ./docker-run/logs:/tmp/logs
+    networks:
+      - lambda-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--max-time", "5", "http://localhost:8080/2015-03-31/functions/function/invocations", "--data", '{"url":"https://httpbin.org/status/200"}']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Local development/testing service
+  web-automator-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: web-automator-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+    volumes:
+      # Mount source for development
+      - .:/app
+      - /app/node_modules
+      - ./output:/app/output
+      - ./downloads:/app/downloads
+    networks:
+      - lambda-network
+    profiles:
+      - dev
+    command: ["npm", "run", "dev"]
+
+  # Lambda testing service with curl
+  lambda-tester:
+    image: curlimages/curl:latest
+    container_name: lambda-tester
+    depends_on:
+      - web-automator-lambda
+    networks:
+      - lambda-network
+    profiles:
+      - test
+    volumes:
+      - ./tests/test-events:/test-events:ro
+    command: 
+      - sh
+      - -c
+      - |
+        echo 'Waiting for Lambda to be ready...' &&
+        sleep 10 &&
+        echo 'Testing Lambda function...' &&
+        curl -X POST 'http://web-automator-lambda:8080/2015-03-31/functions/function/invocations' \
+          -H 'Content-Type: application/json' \
+          -d @/test-events/basic-test.json
+
+networks:
+  lambda-network:
+    driver: bridge
+
+volumes:
+  lambda-logs:
+    driver: local

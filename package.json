@@ -1,0 +1,47 @@
+{
+  "name": "web-automation",
+  "version": "1.0.0",
+  "description": "Smart web automation framework with intelligent dependency management for Selenium and Playwright",
+  "scripts": {
+    "setup": "node scripts/setup-dependencies.js check",
+    "setup:selenium": "node scripts/setup-dependencies.js selenium",
+    "setup:playwright": "node scripts/setup-dependencies.js playwright",
+    "setup:all": "node scripts/setup-dependencies.js all",
+    "run:simple-selenium": "node scripts/setup-dependencies.js auto src/examples/simple-selenium.js && node scripts/launcher.js src/examples/simple-selenium.js src/examples",
+    "run:simple-playwright": "node scripts/setup-dependencies.js auto src/examples/simple-playwright.js && node scripts/launcher.js src/examples/simple-playwright.js src/examples",
+    "selenium": "npm run run:simple-selenium",
+    "playwright": "npm run run:simple-playwright",
+    "lambda": "node scripts/setup-dependencies.js auto index.js && node index.js",
+    "lambda:test": "npm run lambda",
+    "docker:build": "docker-compose build web-automator-lambda",
+    "docker:start": "docker-compose up -d web-automator-lambda",
+    "docker:test": "node test-lambda.js",
+    "docker:test:basic": "node test-lambda.js basic-test.json", 
+    "docker:test:powershell": "powershell -Command \"$body = Get-Content 'tests/test-events/basic-test.json' -Raw; $response = Invoke-WebRequest -Uri 'http://localhost:9000/2015-03-31/functions/function/invocations' -Method POST -Body $body -ContentType 'application/json'; $response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 10\"",
+    "docker:dev": "docker-compose --profile dev up web-automator-dev",
+    "docker:stop": "docker-compose down",
+    "docker:logs": "docker-compose logs -f web-automator-lambda",
+    "docker:restart": "docker-compose restart web-automator-lambda",
+    "docker:status": "docker-compose ps && echo '' && echo 'Recent logs:' && docker-compose logs --tail=5 web-automator-lambda",
+    "docker:monitor": "node monitor-lambda.js monitor",
+    "docker:health": "node monitor-lambda.js status",
+    "docker:cleanup": "docker-compose down --volumes --remove-orphans && docker system prune -f",
+    "clean": "node -e \"const fs=require('fs'); ['output', 'downloads'].forEach(dir => { try { fs.rmSync(dir, {recursive: true}); console.log(`Cleaned ${dir}/`); } catch(e) { console.log(`${dir}/ not found`); } })\"",
+    "test": "npm run setup && echo 'Tests would go here'",
+    "dev": "echo 'Choose: npm run selenium OR npm run playwright OR npm run lambda OR npm run docker:dev'",
+    "start": "npm run dev"
+  },
+  "author": "Norman Valerio",
+  "license": "MIT",
+  "dependencies": {
+    "winston": "^3.18.3"
+  },
+  "optionalDependencies": {
+    "@sparticuz/chromium": "^141.0.0",
+    "playwright": "^1.48.0",
+    "selenium-webdriver": "^4.38.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
