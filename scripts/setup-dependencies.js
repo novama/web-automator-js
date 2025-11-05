@@ -39,7 +39,7 @@ function installPackage(packageName, options = {}) {
   
   log(`📦 Installing ${packageName}...`, 'blue');
   
-  let command = `npm install ${packageName}`;
+  let command = `npm install --strict-ssl=false ${packageName}`;
   if (global) command += ' -g';
   if (dev) command += ' --save-dev';
   
@@ -67,7 +67,10 @@ function setupPlaywright() {
   // Install browsers
   log('🌐 Installing Playwright browsers...', 'blue');
   try {
-    execSync('npx playwright install chromium firefox webkit', { stdio: 'inherit' });
+    execSync('npx playwright install chromium firefox webkit', { 
+        stdio: 'inherit',
+        env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED: '0' }
+    });
     log('✅ Playwright browsers installed successfully', 'green');
     return true;
   } catch (error) {
