@@ -18,12 +18,16 @@ const ChromeSeleniumDriver = require('../automator/selenium/drivers/chromeSeleni
 const FirefoxSeleniumDriver = require('../automator/selenium/drivers/firefoxSeleniumDriver');
 const EdgeSeleniumDriver = require('../automator/selenium/drivers/edgeSeleniumDriver');
 
+// Define configuration file path
+const CONFIG_FILE_PATH = '../../config/simple-example-config.json';
+const TARGET_URL = 'https://example.com';
+
 async function simpleWebAutomationExample() {
-    console.log('🚀 Starting simple web automation example...\n');
+    console.log('🚀 Starting simple Selenium web automation example...\n');
 
     // Load configuration
     logger.info('Loading configuration from JSON file...');
-    const config = new ConfigManager('../../config/simple-example-config.json');
+    const config = new ConfigManager(CONFIG_FILE_PATH);
 
     // Get app configuration
     const app = config.get('app', {});
@@ -35,6 +39,7 @@ async function simpleWebAutomationExample() {
     logger.info(`Browser: ${selenium.browser}`);
     logger.info(`Headless: ${selenium.headless ? 'Yes' : 'No'}`);
     logger.info(`Window Size: ${selenium.windowSize}`);
+    logger.info(`Target URL: ${playwright.targetUrl || 'Not specified'}`);
 
     // Create selenium driver based on configuration
     logger.info('\n🌐 Creating web automation driver...');
@@ -70,8 +75,8 @@ async function simpleWebAutomationExample() {
         await driver.start();
 
         // Navigate to a simple webpage
-        logger.info('Navigating to example.com...');
-        await driver.navigateTo('https://example.com');
+        logger.info(`Navigating to ${TARGET_URL}...`);
+        await driver.navigateTo(TARGET_URL);
 
         // Get page information
         const pageTitle = await driver.getTitle();

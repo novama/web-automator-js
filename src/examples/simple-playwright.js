@@ -16,12 +16,16 @@ const ConfigManager = require('../common/utils/configManager');
 // Import playwright driver
 const PlaywrightDriver = require('../automator/playwright/drivers/playwrightDriver');
 
+// Define configuration file path
+const CONFIG_FILE_PATH = '../../config/simple-example-config.json';
+const TARGET_URL = 'https://example.com';
+
 async function simpleWebAutomationExample() {
-    console.log('🚀 Starting simple web automation example...\n');
+    console.log('🚀 Starting simple Playwright web automation example...\n');
 
     // Load configuration
     logger.info('Loading configuration from JSON file...');
-    const config = new ConfigManager('../../config/simple-example-config.json');
+    const config = new ConfigManager(CONFIG_FILE_PATH);
 
     // Get app configuration
     const app = config.get('app', {});
@@ -33,7 +37,8 @@ async function simpleWebAutomationExample() {
     logger.info(`Browser: ${playwright.browser}`);
     logger.info(`Headless: ${playwright.headless ? 'Yes' : 'No'}`);
     logger.info(`Window Size: ${playwright.windowSize?.width}x${playwright.windowSize?.height}`);
-    logger.info(`Video Recording: ${playwright.recordVideo ? 'Enabled' : 'Disabled (will be enabled for this example)'}`);
+    logger.info(`Video Recording: ${playwright.recordVideo ? 'Enabled' : 'Disabled'}`);
+    logger.info(`Target URL: ${playwright.targetUrl || 'Not specified'}`);
 
     // Create playwright driver based on configuration
     logger.info('\n🌐 Creating web automation driver...');
@@ -75,8 +80,8 @@ async function simpleWebAutomationExample() {
         }
 
         // Navigate to a simple webpage
-        logger.info('Navigating to example.com...');
-        await driver.navigateTo('https://example.com');
+        logger.info(`Navigating to ${TARGET_URL}...`);
+        await driver.navigateTo(TARGET_URL);
 
         // Get page information
         const pageTitle = await driver.getTitle();
